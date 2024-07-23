@@ -1,0 +1,56 @@
+/*nav/body css*/
+body{
+    background-color:grey;
+    margin: 0px;
+    align-items: center;
+    justify-content: center;
+}
+h1{
+    text-align:center;
+    color: white;
+}
+.navbar{
+    background-color: black;
+}
+.navbar ul{
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+}
+
+.navbar a{
+    color: white;
+    text-decoration: none;
+    padding: 15px;
+    display:block;
+    text-align: center;
+}
+
+.navbar a:hover{
+    background-color: rgb(22, 20, 20);
+}
+
+
+.navbar li{
+    float: left;
+}
+
+/*button Css */
+a{
+    justify-content: center;
+    align-items: center;
+}
+/*button{
+    background-color: black;
+    border-radius: 5px;
+    font-size: 30px;
+    color:white;
+    display:flex;
+}
+
+button a{
+    float:left;
+}*/
+
+
