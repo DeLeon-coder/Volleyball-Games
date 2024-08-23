@@ -1,0 +1,16 @@
+/*nav/body css*/
+body{
+    background-color:black;
+    /*margin: 0px;
+    align-items: center;
+    justify-content: center;*/
+}
+h1{
+    text-align:center;
+    color: white;
+}
+
+label{
+    color:white
+}
+
