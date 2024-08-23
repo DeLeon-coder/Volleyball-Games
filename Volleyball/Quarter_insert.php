@@ -39,6 +39,7 @@
                         Insert
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="team_insert.php">Team</a>
                         <a class="dropdown-item" href="Quarter_insert.php">Quarter Games</a>
                         <a class="dropdown-item" href="#">Another action</a>
                         <a class="dropdown-item" href="#">Something else here</a>
