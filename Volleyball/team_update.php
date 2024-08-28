@@ -4,76 +4,75 @@
     <?php include('header.php')?>
 </head>
 <body>
-    <?php include('nav.php')?>
-    <br>    
+    <?php include('nav.php'); ?>
+    <br>
     <?php 
     // Set the page title
-    $page_title = 'Input Teams';
+    $page_title = 'Update Teams';
 
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
         require('connect.inc'); //Connect to DB
 
-        $errors = array(); //Initialize an Error
+        $errors = array(); // Initialize an Error array
 
-        //Check for ID
+        // Check for Team ID
         if(empty($_POST['team_id'])) {
-            $errors[] = 'You did not input an ID';
+            $errors[] = 'You did not input a Team ID';
         } else {
             $id = mysqli_real_escape_string($conn, trim($_POST['team_id']));
         }
         
-        //Check for team name
+        // Check for team name
         if(empty($_POST['team_name'])) {
             $errors[] = 'You did not input a Team Name';
         } else {
             $team_name = mysqli_real_escape_string($conn, trim($_POST['team_name']));
         }
 
-        //Check for venue Id
-        if(empty($_POST['wins'])) {
+        // Check for venue Id
+        if(empty($_POST['venue_id'])) {
             $errors[] = 'You did not input a venue';
         } else {
-            $v_id = mysqli_real_escape_string($conn, trim($_POST['wins']));
+            $v_id = mysqli_real_escape_string($conn, trim($_POST['venue_id']));
         }
-        
 
-        if(empty($errors)) { //If everything is OK
-            //Input the team into the db
+        if(empty($errors)) { // If no errors, update the team in the database
 
-            //Make the Query
-            $q = "INSERT INTO team_table (team_name, team_id, wins) 
-                VALUES ('$team_name', '$id', '$v_id')";
-            $r = @mysqli_query($conn, $q); //Run the Query
+            // Make the Query to update the team record
+            $q = "UPDATE team_table SET team_name='$team_name', venue_id='$v_id' WHERE team_id='$id'";
+            $r = @mysqli_query($conn, $q); // Run the Query
 
-            if ($r) { // If it ran ok
-                //Print a success message
+            if ($r) { // If the query was successful
+                // Print a success message
                 echo '<h1>Thank You</h1>
-                    <p>The team is now registered</p><p><br /></p>';
-            } else { //If did not run ok
-                //Public Message
-                echo '<h1> System Error</h1>
-                    <p class="error"> The team was not inputted due to a system error.</p>';
+                    <p>The team details have been successfully updated.</p><p><br /></p>';
+            } else { // If there was an error
+                // Public Message
+                echo '<h1>System Error</h1>
+                    <p class="error"> The team details could not be updated due to a system error.</p>';
 
-                //Debugging Message
+                // Debugging Message
                 echo '<p>' . mysqli_error($conn) . '<br /><br />Query: ' . $q . '</p>';
-            } //End of if ($r)
+            }
 
-            mysqli_close($conn); //Close the DB connection
-            exit(); //Quit the script
+            mysqli_close($conn); // Close the database connection
+            exit(); // Quit the script
         } else { // Report the errors
             echo '<h1>Error!</h1>
                 <p class="error"> The following errors occurred:<br />';
-            foreach ($errors as $msg) { //Print each error
+            foreach ($errors as $msg) { // Print each error
                 echo "- $msg<br />\n";    
             }
             echo '</p><p>Please try again.</p><p><br /></p>';
-        } //End of if (empty($errors))
-    } // End of the main submit conditional
+        }
+    } 
     ?>
-    <form action="team_insert.php" method="post">
+
+    <!-- Update Form -->
+    <form action="team_update.php" method="post">
         <div class="container">
-            <h2 class="text-center">Input a Team</h2>
+            <h2 class="text-center">Update a Team</h2>
             
             <div class="form-group">
                 <label for="team_id">Team ID</label>
@@ -86,14 +85,13 @@
             </div>
 
             <div class="form-group">
-                <label for="">Wins</label>
-                <input type="number" class="form-control" id="wins" name="wins" size="10" placeholder="Wins..." value="<?php if (isset($_POST['venue_id'])) echo htmlspecialchars($_POST['wins']); ?>" />
+                <label for="venue_id">Venue ID</label>
+                <input type="number" class="form-control" id="venue_id" name="venue_id" size="10" placeholder="Venue ID..." value="<?php if (isset($_POST['venue_id'])) echo htmlspecialchars($_POST['venue_id']); ?>" />
             </div>
 
-            <button type="submit" class="btn btn-dark">Insert</button>
+            <button type="submit" class="btn btn-dark">Update</button>
         </div>
     </form>
-
     <br>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

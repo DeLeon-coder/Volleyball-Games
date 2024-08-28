@@ -3,7 +3,7 @@
 include('connect.inc');
 
 // Query the team_table
-$query = "SELECT * FROM team_table ORDER BY wins DESC";
+$query = "SELECT * FROM quarter_points_table";
 $result = $conn->query($query);
 
 ?>
@@ -13,15 +13,17 @@ $result = $conn->query($query);
     <?php include('header.php')?>
 </head>
 <body>
-    <?php include('nav.php')?>
+    <?php include('nav.php')?> 
     <div class="container">
-        <h1 class="mt-5">Teams List</h1>
+        <h1 class="mt-5">Quarter Games</h1>
         <table class="table table-striped mt-4 text-white">
             <thead>
                 <tr>
+                    <th>Match ID</th>
                     <th>Team ID</th>
-                    <th>Team Name</th>
-                    <th>Wins</th>
+                    <th>Set 1 Pts</th>
+                    <th>Set 2 Pts</th>
+                    <th>Set 3 Pts</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,9 +33,11 @@ $result = $conn->query($query);
                     // Fetch data row by row
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
-                        echo "<td>" . $row['team_id'] . "</td>";
-                        echo "<td>" . $row['team_name'] . "</td>";
-                        echo "<td>" . $row['wins'] . "</td>";
+                        echo "<td>" . $row['match_time_match_id'] . "</td>";
+                        echo "<td>" . $row['team_table_team_id'] . "</td>";
+                        echo "<td>" . $row['set_1_points'] . "</td>";
+                        echo "<td>" . $row['set_2_points'] . "</td>";
+                        echo "<td>" . $row['set_3_points'] . "</td>";
                         echo "</tr>";
                     }
                 } else {

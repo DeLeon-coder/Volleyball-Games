@@ -1,91 +1,159 @@
-<?php
-$page_title='Update page';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php include('header.php')?>
+</head>
+<body>
+    <?php include('nav.php')?>
+    <div class="container">
+        <h2 class="text-center">Update Points</h2>
 
+        <?php
+        // Include your database connection file
+        require('connect.inc'); 
 
-//Check for form submission:
-if($_SERVER['REQUEST_METHOD']=='POST'){
-    require ('connect.inc');// connect to db
+        // Fetch available match IDs and team IDs
+        $match_ids = array();
+        $team_ids = array();
 
-    $errors = array(); //Initialize  an error array
-
-
-    //Validate Team ID
-    if(empty($_POST['team_id'])){
-        $errors[] = 'You did not input a team ID';
-    } else{
-        $tid= mysqli_real_escape_string ($conn,trim($_POST['team_id']));
-    }
-
-    //Validate Team Name
-    if(empty($_POST['team_name'])){
-        $errors[] = 'You did not enter the current team name';
-    } else{
-        $tn = mysqli_real_escape_string ($conn,trim($_POST['team_name']));
-    }
-
-    //Check for new password and match
-    //against the confirmed password:
-    if(!empty($_POST['new_tn1'])){
-        if($_POST['new_tn1']!=$_POST['new_tn2']){
-            $errors[]="Your new name does not match your confirmed name.";
-        } else{
-            $ntn = mysqli_real_escape_string($conn, trim($_POST['new_tn1']));      
-        }
-    }else{
-        $errors[] = 'You forgot to enter your new name.';
-    }
-    if(empty($errors)){ // If everything's OK.
-        //Check that if they have placed the correct current team name
-
-        $q = "SELECT team_id  FROM Team_Table WHERE team_id='$tid' AND team_name=SHA1('$tn')";
-        $r = @mysqli_query($conn,$q);
-        /*if (!$r) {
-            echo '<p>Query Error: ' . mysqli_error($conn) . '</p>';
-        }*/
-        $num = @mysqli_num_rows($r);
-        if ($num == 1){ //Match was made.
-
-            // Get the team_id
-            $row = mysqli_fetch_array($r, MYSQLI_NUM);
-
-            // Make the update query
-            $q = "UPDATE team_table SET team_name=SHA1('$ntn') WHERE team_id='$tid'";
-            $r = @mysqli_num_rows($conn,$q);
-
-            if(mysqli_affected_rows($conn)==1){ //If it ran OK.
-                //Print a Msg
-                echo'<h2> Thank You</h2>
-                <p>The current team has been updated</p><p><br /></p>';
-            } else{ //If did not run OK.
-                //Public Msg
-                echo'<h2> Error</h2>
-                <p class="error">Your new team name cannot be changed due to a system error.</p>';
-                //Debbugging msg
-                echo'<p>' . mysqli_error($conn) . '<br /><br />Query:'. $q . '</p>';
+        // Fetch match IDs from the match_time_table (or relevant table)
+        $match_query = "SELECT match_id FROM match_time"; // Adjust table name if needed
+        $match_result = mysqli_query($conn, $match_query);
+        if ($match_result) {
+            while ($row = mysqli_fetch_assoc($match_result)) {
+                $match_ids[] = $row['match_id'];
             }
-            mysqli_close($conn); //Close the db connection
-            exit();
-        } else {//invalid team_id or team_name
-            echo'<h2> Error!</h2>
-            <p class="error"> The team ID and current team name do not match those on the file.</p>';
+        } else {
+            echo "<p class='text-danger'>Error fetching match IDs: " . mysqli_error($conn) . "</p>";
         }
-    } else{ //Report the errors
-        echo '<h1> Error!</h2>
-        <p class="error"> The following error(s) occured:<br />';
-        foreach($errors as $msg) { //Print each error
-            echo "- $msg<br />\n"; 
-        }
-        echo '</p><p>Please Try again.</p><p><br /></p>';
 
-    }// End of If (empty($errors)) IF.
-    mysqli_close($conn); //Close the db connection
-}// End of main Sumbit Conditional
-?>
-<h1>Change a Team Name</h1>
-<form action="update.php" method="post">
-    <p>Team ID: <input type="text" name="team_id" size="10" value="<?php if (isset($_POST['team_id'])) echo htmlspecialchars($_POST['team_id']); ?>" /></p>
-    <p>Current Team Name: <input type="text" name="team_name" size="40" maxlength="60" value="<?php if (isset($_POST['team_name'])) echo htmlspecialchars($_POST['team_name']); ?>" /></p>
-    <p>New Name: <input type="text" name="new_tn1" size="40" maxlength="60" value="<?php if (isset($_POST['new_tn1'])) echo htmlspecialchars($_POST['new_tn1']); ?>" /></p>
-    <p>Confirm New Name: <input type="text" name="new_tn2" size="40" maxlength="60" value="<?php if (isset($_POST['new_tn2'])) echo htmlspecialchars($_POST['new_tn2']); ?>" /></p>
-    <p><input type="submit" name="submit" value="Change Team Name" /></p>
-</form>
+        // Fetch team IDs from the team_table (or relevant table)
+        $team_query = "SELECT team_id FROM team_table"; // Adjust table name if needed
+        $team_result = mysqli_query($conn, $team_query);
+        if ($team_result) {
+            while ($row = mysqli_fetch_assoc($team_result)) {
+                $team_ids[] = $row['team_id'];
+            }
+        } else {
+            echo "<p class='text-danger'>Error fetching team IDs: " . mysqli_error($conn) . "</p>";
+        }
+        ?>
+
+        <!-- Form with table selection -->
+        <form action="" method="post">
+            <!-- Table selection dropdown -->
+            <div class="form-group">
+                <label for="table">Select Table:</label>
+                <select class="form-control" id="table" name="table">
+                    <option value="quarter_points_table">Quarter Table</option>
+                    <option value="semi_points_table">Semi Table</option>
+                    <option value="final_points_table">Final Table</option>
+                </select>
+            </div>
+
+            <!-- Match ID Dropdown -->
+            <div class="form-group">
+                <label for="match_time_match_id">Select Match ID:</label>
+                <select class="form-control" id="match_time_match_id" name="match_time_match_id" required>
+                    <option value="" disabled selected>Select Match ID</option>
+                    <?php
+                    foreach ($match_ids as $match_id) {
+                        echo "<option value='$match_id'>$match_id</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <!-- Team ID Dropdown -->
+            <div class="form-group">
+                <label for="team_table_team_id">Select Team ID:</label>
+                <select class="form-control" id="team_table_team_id" name="team_table_team_id" required>
+                    <option value="" disabled selected>Select Team ID</option>
+                    <?php
+                    foreach ($team_ids as $team_id) {
+                        echo "<option value='$team_id'>$team_id</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <!-- Inputs for points -->
+            <div class="form-group">
+                <label for="set_1_points">Set 1:</label>
+                <input type="number" class="form-control" id="set_1_points" name="set_1_points" placeholder="Enter Set 1 points">
+            </div>
+            
+            <div class="form-group">
+                <label for="set_2_points">Set 2:</label>
+                <input type="number" class="form-control" id="set_2_points" name="set_2_points" placeholder="Enter Set 2 points">
+            </div>
+
+            <div class="form-group">
+                <label for="set_3_points">Set 3:</label>
+                <input type="number" class="form-control" id="set_3_points" name="set_3_points" placeholder="Enter Set 3 points">
+            </div>
+
+            <button type="submit" class="btn btn-dark">Update Points</button>
+        </form>
+
+        <?php
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $errors = array(); // Initialize error array
+
+            // Get and sanitize input values
+            $table = mysqli_real_escape_string($conn, $_POST['table']);
+            $match_id = mysqli_real_escape_string($conn, trim($_POST['match_time_match_id']));
+            $team_id = mysqli_real_escape_string($conn, trim($_POST['team_table_team_id']));
+            $set_1_points = mysqli_real_escape_string($conn, trim($_POST['set_1_points']));
+            $set_2_points = mysqli_real_escape_string($conn, trim($_POST['set_2_points']));
+            $set_3_points = mysqli_real_escape_string($conn, trim($_POST['set_3_points']));
+
+            // Ensure both Match ID and Team ID are provided
+            if (empty($match_id) || empty($team_id)) {
+                echo "<p class='text-danger'>Please provide both Match ID and Team ID.</p>";
+                exit();
+            }
+
+            // Prepare the query to update points only where match_id and team_id match
+            $updates = array();
+
+            if (!empty($set_1_points)) {
+                $updates[] = "set_1_points = '$set_1_points'";
+            }
+
+            if (!empty($set_2_points)) {
+                $updates[] = "set_2_points = '$set_2_points'";
+            }
+
+            if (!empty($set_3_points)) {
+                $updates[] = "set_3_points = '$set_3_points'";
+            }
+
+            if (count($updates) > 0) {
+                // Join all update fields with commas
+                $update_query = implode(", ", $updates);
+
+                // Build the full update query
+                $query = "UPDATE $table SET $update_query WHERE match_time_match_id = '$match_id' AND team_table_team_id = '$team_id'";
+
+                // Execute the query and handle errors
+                if (mysqli_query($conn, $query)) {
+                    echo "<p class='text-success'>Points updated successfully in $table for Match ID: $match_id and Team ID: $team_id.</p>";
+                } else {
+                    echo "<p class='text-danger'>Error: " . mysqli_error($conn) . "</p>";
+                }
+            } else {
+                echo "<p class='text-danger'>No points were provided for update.</p>";
+            }
+
+            // Close the database connection
+            mysqli_close($conn);
+        }
+        ?>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
